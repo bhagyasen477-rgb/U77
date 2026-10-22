@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f7ff">
+<title>Secret Emoji</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f7f7ff;
+  --surface: #ffffff;
+  --text: #191b25;
+  --muted: #626475;
+  --primary: #4858a9;
+  --on-primary: #ffffff;
+  --outline: #777987;
+  --soft: #e5e8ff;
+}
+body.dark {
+  color-scheme: dark;
+  --bg: #121318;
+  --surface: #202127;
+  --text: #e4e2eb;
+  --muted: #c4c3d0;
+  --primary: #b9c3ff;
+  --on-primary: #202b66;
+  --outline: #90919f;
+  --soft: #303858;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Roboto, "Google Sans", Arial, sans-serif;
+  transition: background .2s, color .2s;
+}
+header {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 760px;
+  margin: auto;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { font-size: 29px; }
+h1 { font-size: 21px; margin: 0; }
+.subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+button, textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 24px;
+  padding: 12px 18px;
+  font-weight: 600;
+  transition: opacity .15s, transform .15s;
+}
+button:active { transform: scale(.98); }
+button:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+.theme {
+  background: var(--soft);
+  color: var(--text);
+  padding: 11px 14px;
+}
+main {
+  max-width: 760px;
+  padding: 16px;
+  margin: auto;
+}
+.hero { text-align: center; padding: 28px 10px 24px; }
+.hero .big { font-size: 48px; }
+.hero h2 { font-size: 27px; margin: 12px 0 8px; }
+.hero p { color: var(--muted); line-height: 1.6; margin: auto; max-width: 430px; }
+.tabs {
+  display: flex;
+  background: var(--soft);
+  padding: 5px;
+  border-radius: 30px;
+  margin-bottom: 18px;
+  gap: 4px;
+}
+.tabs button {
+  flex: 1;
+  background: transparent;
+  color: var(--text);
+}
+.tabs button.active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.card {
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 23px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px #0000000c;
+}
+.card h3 { font-size: 18px; margin: 0 0 8px; }
+.help { color: var(--muted); font-size: 14px; line-height: 1.5; }
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+  padding: 16px;
+  margin-top: 16px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--outline);
+  border-radius: 17px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.primary { background: var(--primary); color: var(--on-primary); }
+.secondary { background: var(--soft); color: var(--text); }
+.result {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--bg);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.result-label { color: var(--muted); font-size: 13px; }
+.emoji-output { font-size: 36px; margin: 12px 0; }
+#encoded { font-size: 26px; line-height: 1.8; }
+.notice {
+  background: var(--soft);
+  padding: 16px;
+  border-radius: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.status { margin-top: 12px; font-size: 14px; color: var(--muted); }
+[hidden] { display: none !important; }
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 15px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="brand-icon">🔐</span>
+    <div>
+      <h1>Secret Emoji</h1>
+      <div class="subtitle">Your message, disguised</div>
+    </div>
+  </div>
+  <button class="theme" id="themeBtn" aria-label="Toggle dark theme">🌙</button>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="big">💌</div>
+    <h2>Say it secretly.</h2>
+    <p>Turn a message into one emoji-style symbol, send it to a friend, and decode it here.</p>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button class="active" id="encodeTab" role="tab" aria-selected="true">🔒 Encode</button>
+    <button id="decodeTab" role="tab" aria-selected="false">🔓 Decode</button>
+  </div>
+
+  <section class="card" id="encodePanel">
+    <h3>Write your secret</h3>
+    <div class="help">Enter a message to create a copyable symbol.</div>
+    <textarea id="message" maxlength="2000"
+      placeholder="Type your secret message here..."></textarea>
+    <div class="actions">
+      <button class="primary" id="encodeBtn">✨ Encode message</button>
+      <button class="secondary" id="clearEncode">Clear</button>
+    </div>
+    <div class="result" id="encodeResult" hidden>
+      <div class="result-label">Your secret symbol</div>
+      <div class="emoji-output" id="encoded" aria-label="Encoded secret"></div>
+      <div class="help">Copy the symbol and paste it into WhatsApp.</div>
+      <div class="actions" style="justify-content:center">
+        <button class="primary" id="copyBtn">📋 Copy symbol</button>
+      </div>
+    </div>
+    <div class="status" id="encodeStatus" role="status"></div>
+  </section>
+
+  <section class="card" id="decodePanel" hidden>
+    <h3>Decode a friend's message</h3>
+    <div class="help">Paste the complete symbol you received.</div>
+    <textarea id="secretInput" placeholder="Paste the secret symbol here..."></textarea>
+    <div class="actions">
+      <button class="primary" id="decodeBtn">🔓 Decode message</button>
+      <button class="secondary" id="clearDecode">Clear</button>
+    </div>
+    <div class="result" id="decodeResult" hidden>
+      <div class="result-label">Original message</div>
+      <div id="decodedText" style="white-space:pre-wrap;overflow-wrap:anywhere;margin-top:14px"></div>
+      <div class="actions" style="justify-content:center">
+        <button class="secondary" id="copyMessageBtn">📋 Copy message</button>
+      </div>
+    </div>
+    <div class="status" id="decodeStatus" role="status"></div>
+  </section>
+
+  <div class="notice">
+    <strong>How to use</strong><br>
+    1. Type your message and tap Encode.<br>
+    2. Copy the generated symbol and send it on WhatsApp.<br>
+    3. Your friend pastes it into Decode.<br><br>
+    <strong>Important:</strong> The message is hidden inside Unicode tag characters. Some apps or keyboards may remove them. Test it with a friend first. This is obfuscation, not secure encryption. Don't use it for passwords or sensitive information.
+  </div>
+</main>
+<footer>Secret Emoji · Material 3 inspired · Works in your browser</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Unicode tag characters are invisible formatting characters.
+// The visible emoji is the carrier; the tag sequence stores hex data.
+const CARRIER = "🤫";
+const TAG_START = 0xE0000;
+const TAG_END = 0xE007F;
+
+function encodeSecret(text) {
+  const bytes = new TextEncoder().encode(text);
+  let hex = "";
+  for (const byte of bytes) {
+    hex += byte.toString(16).padStart(2, "0");
+  }
+
+  // Each hexadecimal digit becomes a Unicode tag character.
+  let hidden = "";
+  for (const ch of hex) {
+    hidden += String.fromCodePoint(TAG_START + ch.charCodeAt(0));
+  }
+  return CARRIER + hidden + String.fromCodePoint(TAG_END);
+}
+
+function decodeSecret(input) {
+  const points = Array.from(input, ch => ch.codePointAt(0));
+  let hex = "";
+  let started = false;
+  let ended = false;
+
+  for (const cp of points) {
+    if (cp >= TAG_START + 48 && cp <= TAG_START + 57) {
+      hex += String.fromCharCode(cp - TAG_START);
+      started = true;
+    } else if (cp >= TAG_START + 97 && cp <= TAG_START + 102) {
+      hex += String.fromCharCode(cp - TAG_START);
+      started = true;
+    } else if (cp === TAG_END && started) {
+      ended = true;
+      break;
+    }
+  }
+
+  if (!started || !ended || hex.length % 2 !== 0) {
+    throw new Error("No valid secret found. Paste the complete encoded symbol.");
+  }
+
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  }
+
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    throw new Error("The symbol is damaged or incomplete.");
+  }
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.appendChild(area);
+  area.select();
+  const success = document.execCommand("copy");
+  area.remove();
+
+  if (!success) throw new Error("Copy failed. Please select and copy manually.");
+}
+
+$("encodeTab").addEventListener("click", () => {
+  $("encodePanel").hidden = false;
+  $("decodePanel").hidden = true;
+  $("encodeTab").classList.add("active");
+  $("decodeTab").classList.remove("active");
+  $("encodeTab").setAttribute("aria-selected", "true");
+  $("decodeTab").setAttribute("aria-selected", "false");
+});
+
+$("decodeTab").addEventListener("click", () => {
+  $("encodePanel").hidden = true;
+  $("decodePanel").hidden = false;
+  $("decodeTab").classList.add("active");
+  $("encodeTab").classList.remove("active");
+  $("decodeTab").setAttribute("aria-selected", "true");
+  $("encodeTab").setAttribute("aria-selected", "false");
+});
+
+$("encodeBtn").addEventListener("click", () => {
+  const message = $("message").value;
+  if (!message) {
+    $("encodeStatus").textContent = "Please enter a message first.";
+    return;
+  }
+  $("encoded").textContent = encodeSecret(message);
+  $("encodeResult").hidden = false;
+  $("encodeStatus").textContent = "Encoded successfully.";
+});
+
+$("copyBtn").addEventListener("click", async () => {
+  try {
+    await copyText($("encoded").textContent);
+    $("encodeStatus").textContent = "Copied! Paste it into WhatsApp.";
+  } catch (error) {
+    $("encodeStatus").textContent = error.message;
+  }
+});
+
+$("decodeBtn").addEventListener("click", () => {
+  try {
+    const message = decodeSecret($("secretInput").value);
+    $("decodedText").textContent = message;
+    $("decodeResult").hidden = false;
+    $("decodeStatus").textContent = "Decoded successfully.";
+  } catch (error) {
+    $("decodeResult").hidden = true;
+    $("decodeStatus").textContent = error.message;
+  }
+});
+
+$("copyMessageBtn").addEventListener("click", async () => {
+  try {
+    await copyText($("decodedText").textContent);
+    $("decodeStatus").textContent = "Original message copied.";
+  } catch (error) {
+    $("decodeStatus").textContent = error.message;
+  }
+});
+
+$("clearEncode").addEventListener("click", () => {
+  $("message").value = "";
+  $("encodeResult").hidden = true;
+  $("encodeStatus").textContent = "";
+});
+
+$("clearDecode").addEventListener("click", () => {
+  $("secretInput").value = "";
+  $("decodeResult").hidden = true;
+  $("decodeStatus").textContent = "";
+});
+
+$("themeBtn").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const dark = document.body.classList.contains("dark");
+  $("themeBtn").textContent = dark ? "☀️" : "🌙";
+  document.querySelector('meta[name="theme-color"]').content =
+    dark ? "#121318" : "#f7f7ff";
+});
+</script>
+</body>
+</html>
